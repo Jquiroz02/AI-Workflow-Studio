@@ -1,0 +1,42 @@
+# --- Python / backend ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# --- Node / frontend ---
+node_modules/
+dist/
+dist-ssr/
+.vite/
+coverage/
+*.tsbuildinfo
+
+# --- Env / secrets ---
+.env
+.env.*
+!.env.example
+!*.env.example
+
+# --- Uploaded files (local dev storage) ---
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# --- Editor / OS ---
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# --- Claude Code session state ---
+.claude/
+
+# --- Logs ---
+*.log
+npm-debug.log*

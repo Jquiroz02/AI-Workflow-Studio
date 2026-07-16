@@ -1,0 +1,71 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: aiws-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aiws
+      POSTGRES_PASSWORD: aiws_local_password
+      POSTGRES_DB: ai_workflow_studio
+    ports:
+      - "5432:5432"
+    volumes:
+      - aiws_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aiws -d ai_workflow_studio"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    container_name: aiws-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql://aiws:aiws_local_password@db:5432/ai_workflow_studio
+      # Same bind-mount limitation as the frontend service (see its
+      # DOCKER_CONTAINER note below): uvicorn --reload's watchfiles backend
+      # also depends on native OS filesystem events by default, which don't
+      # reliably reach this container either, silently leaving the running
+      # process on stale, pre-edit code with no reload log line and no error.
+      WATCHFILES_FORCE_POLLING: "true"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - aiws_uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: aiws-frontend
+    restart: unless-stopped
+    env_file:
+      - ./frontend/.env
+    environment:
+      # Tells vite.config.ts to fall back to polling for file-change
+      # detection - native fs events from this service's bind-mounted
+      # ./frontend volume don't reliably reach the container, which
+      # otherwise leaves Vite silently serving stale, pre-edit code with no
+      # HMR and no error.
+      DOCKER_CONTAINER: "true"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  aiws_pgdata:
+  aiws_uploads:
