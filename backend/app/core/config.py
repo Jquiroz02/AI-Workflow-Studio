@@ -1,4 +1,5 @@
 from functools import lru_cache
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -34,18 +35,44 @@ class Settings(BaseSettings):
 
     @property
     def async_database_url(self) -> str:
-        """Connection string for the app's async SQLAlchemy engine (asyncpg)."""
-        if self.database_url.startswith("postgresql+asyncpg://"):
-            return self.database_url
-        if self.database_url.startswith("postgresql://"):
-            return self.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-        return self.database_url
+        url = self.database_url
+
+        if url.startswith("postgresql://"):
+            url = url.replace(
+                "postgresql://",
+                "postgresql+asyncpg://",
+                1,
+            )
+
+        parts = urlsplit(url)
+
+        query_items = [
+            (key, value)
+            for key, value in parse_qsl(parts.query, keep_blank_values=True)
+            if key not in {"sslmode", "channel_binding"}
+        ]
+
+        return urlunsplit(
+            (
+                parts.scheme,
+                parts.netloc,
+                parts.path,
+                urlencode(query_items),
+                parts.fragment,
+            )
+        )
 
     @property
     def sync_database_url(self) -> str:
-        """Connection string for Alembic and test schema setup (psycopg2)."""
+        """Connection string for Alembic and psycopg2."""
+
         if self.database_url.startswith("postgresql+asyncpg://"):
-            return self.database_url.replace("postgresql+asyncpg://", "postgresql://", 1)
+            return self.database_url.replace(
+                "postgresql+asyncpg://",
+                "postgresql://",
+                1,
+            )
+
         return self.database_url
 
     @property
@@ -60,8 +87,6 @@ class Settings(BaseSettings):
     def is_openai_configured(self) -> bool:
         # Both the real default ("sk-placeholder") and the test-suite's
         # sentinel ("sk-test-placeholder") contain "placeholder" - real
-        # OpenAI keys never do, so this is a safe, simple heuristic that
-        # doesn't need a hardcoded list of exact sentinel values.
         return bool(self.openai_api_key) and "placeholder" not in self.openai_api_key.lower()
 
 
