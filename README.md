@@ -8,6 +8,38 @@ This project gave me experience building a complete application from the fronten
 
 ---
 
+## Screenshots
+
+### Landing Page
+
+![Landing Page](images/landing.png)
+
+### Dashboard
+
+![Dashboard](images/dashboard.png)
+
+### AI Chat
+
+![AI Chat](images/chat.png)
+
+### AI Summary
+
+![AI Summary](images/summary.png)
+
+### Flashcards
+
+![Flashcards](images/flashcards.png)
+
+### Quiz Generation
+
+![Quiz Generation](images/quiz.png)
+
+### Dark Mode
+
+![Dark Mode](images/darkmode.png)
+
+---
+
 ## Features
 
 - User authentication with Clerk
@@ -98,7 +130,7 @@ AI-Workflow-Studio
 ### Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/AI-Workflow-Studio.git
+git clone git clone https://github.com/Jquiroz02/AI-Workflow-Studio.git
 cd AI-Workflow-Studio
 ```
 
@@ -217,6 +249,13 @@ Some things I would like to add in the future:
 
 ---
 
-## Demo
+## Live Demo
 
-The application can be run locally using Docker or deployed with Vercel and Render. See the setup instructions above for details.
+Frontend:
+https://ai-workflow-studio-1detl380z-jonathan-quiroz1.vercel.app/
+
+Backend API:
+https://ai-workflow-studio-api.onrender.com
+
+GitHub:
+https://github.com/Jquiroz02/AI-Workflow-Studio
